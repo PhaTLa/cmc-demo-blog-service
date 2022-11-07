@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.demo.blog_management.mapper.BlogMapper">
+
+  <resultMap id="BaseResultMap" type="com.demo.blog_management.model.BlogVo">
+    <id column="id" jdbcType="BIGINT" property="id" />
+    <result column="user_name" jdbcType="VARCHAR" property="userName" />
+    <result column="title" jdbcType="VARCHAR" property="title" />
+    <result column="url" jdbcType="VARCHAR" property="url" />
+    <result column="description" jdbcType="VARCHAR" property="description" />
+    <result column="created_dtm" jdbcType="TIMESTAMP" property="createdDtm" />
+    <result column="created_id" jdbcType="BIGINT" property="createdId" />
+    <result column="updated_dtm" jdbcType="TIMESTAMP" property="updatedDtm" />
+    <result column="updated_id" jdbcType="BIGINT" property="updatedId" />
+  </resultMap>
+
+  <select id="getBlogs" parameterType="com.demo.blog_management.dto.BlogDto" resultMap="BaseResultMap">
+    select * from  (select blog.id as id, blog.title as title, blog.description as description, user.name as user_name, blog.created_dtm as created_dtm, DENSE_RANK() OVER (ORDER BY id) rnum
+    from blog as blog
+    left join user as user on user.id = blog.created_id
+    where 1=1
+    <if test="input.title != null and input.title != ''">
+    	<bind name="title" value="'%' + input.title + '%'" />
+    	AND title like #{title}
+  	</if>
+  	<if test="input.description != null and input.description != ''">
+  		<bind name="description" value="'%' + input.description + '%'" />
+    	AND description like #{description}
+  	</if> ) as tbl1
+  	where tbl1.rnum > #{current_page,jdbcType=INTEGER} and #{page_size,jdbcType=INTEGER} >= tbl1.rnum
+  </select>
+  
+    <select id="countAllBlogs" parameterType="com.demo.blog_management.dto.BlogDto" resultType="int">
+    select count(id) as total
+    from blog
+    where 1=1
+    <if test="input.title != null and input.title != ''">
+    	<bind name="title" value="'%' + input.title + '%'" />
+    	AND title like #{title}
+  	</if>
+  	<if test="input.description != null and input.description != ''">
+    	<bind name="description" value="'%' + input.description + '%'" />
+    	AND description like #{description}
+  	</if>
+  </select>
+</mapper>
