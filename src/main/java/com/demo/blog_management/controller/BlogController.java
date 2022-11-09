@@ -16,7 +16,6 @@ import javax.servlet.http.HttpServletRequest;
 
 @RestController
 @RequestMapping(value = "/api/")
-@CrossOrigin("*")
 public class BlogController {
 	
 	@Autowired
